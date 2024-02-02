@@ -59,7 +59,7 @@ class DB
      */
     protected static $telegram;
 
-    private static $enterprise_id;
+    private static $admin_user_id;
     /**
      * Initialize
      *
@@ -74,7 +74,7 @@ class DB
     public static function initialize(
         array $credentials,
         Telegram $telegram,
-        $enterprise_id = 0,
+        $admin_user_id = 0,
         $table_prefix = '',
         $encoding = 'utf8mb4'
     ): PDO {
@@ -104,7 +104,7 @@ class DB
         self::$telegram          = $telegram;
         self::$mysql_credentials = $credentials;
         self::$table_prefix      = $table_prefix;
-        self::$enterprise_id     = $enterprise_id;
+        self::$admin_user_id     = $admin_user_id;
 
         self::defineTables();
         return self::$pdo;
@@ -213,8 +213,8 @@ class DB
                 FROM `' . TB_TELEGRAM_UPDATE . '`  WHERE 1=1
             ';
 
-            if (self::$enterprise_id > 0) {
-                $sql .= ' AND `enterprise_id` = :enterprise_id';
+            if (self::$admin_user_id > 0) {
+                $sql .= ' AND `admin_user_id` = :admin_user_id';
             }
             if ($id !== '') {
                 $sql .= ' AND `id` = :id';
@@ -231,8 +231,8 @@ class DB
             if ($limit > 0) {
                 $sth->bindValue(':limit', $limit, PDO::PARAM_INT);
             }
-            if (self::$enterprise_id > 0) {
-                $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            if (self::$admin_user_id > 0) {
+                $sth->bindValue(':admin_user_id', self::$admin_user_id);
             }
             if ($id !== '') {
                 $sth->bindValue(':id', $id);
@@ -267,8 +267,8 @@ class DB
                 WHERE 1=1
             ';
 
-            if (self::$enterprise_id > 0) {
-                $sql .= ' AND `enterprise_id` = :enterprise_id';
+            if (self::$admin_user_id > 0) {
+                $sql .= ' AND `admin_user_id` = :admin_user_id';
             }
             $sql .= ' ORDER BY `id` DESC';
 
@@ -278,8 +278,8 @@ class DB
 
             $sth = self::$pdo->prepare($sql);
 
-            if (self::$enterprise_id > 0) {
-                $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            if (self::$admin_user_id > 0) {
+                $sth->bindValue(':admin_user_id', self::$admin_user_id);
             }
 
             if ($limit > 0) {
@@ -386,13 +386,13 @@ class DB
                     `channel_post_id`, `edited_channel_post_id`, `inline_query_id`, `chosen_inline_result_id`,
                     `callback_query_id`, `shipping_query_id`, `pre_checkout_query_id`,
                     `poll_id`, `poll_answer_poll_id`, `my_chat_member_updated_id`, `chat_member_updated_id`,
-                    `chat_join_request_id`,`enterprise_id`
+                    `chat_join_request_id`,`admin_user_id`
                 ) VALUES (
                     :id, :chat_id, :message_id, :edited_message_id,
                     :channel_post_id, :edited_channel_post_id, :inline_query_id, :chosen_inline_result_id,
                     :callback_query_id, :shipping_query_id, :pre_checkout_query_id,
                     :poll_id, :poll_answer_poll_id, :my_chat_member_updated_id, :chat_member_updated_id,
-                    :chat_join_request_id,:enterprise_id
+                    :chat_join_request_id,:admin_user_id
                 )
             ');
 
@@ -412,7 +412,7 @@ class DB
             $sth->bindValue(':my_chat_member_updated_id', $my_chat_member_updated_id);
             $sth->bindValue(':chat_member_updated_id', $chat_member_updated_id);
             $sth->bindValue(':chat_join_request_id', $chat_join_request_id);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -439,9 +439,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT INTO `' . TB_USER . '`
-                (`id`, `is_bot`, `username`, `first_name`, `last_name`, `language_code`, `is_premium`, `added_to_attachment_menu`, `created_at`, `updated_at`,`enterprise_id`)
+                (`id`, `is_bot`, `username`, `first_name`, `last_name`, `language_code`, `is_premium`, `added_to_attachment_menu`, `created_at`, `updated_at`,`admin_user_id`)
                 VALUES
-                (:id, :is_bot, :username, :first_name, :last_name, :language_code, :is_premium, :added_to_attachment_menu, :created_at, :updated_at,:enterprise_id)
+                (:id, :is_bot, :username, :first_name, :last_name, :language_code, :is_premium, :added_to_attachment_menu, :created_at, :updated_at,:admin_user_id)
                 ON DUPLICATE KEY UPDATE
                     `is_bot`                   = VALUES(`is_bot`),
                     `username`                 = VALUES(`username`),
@@ -450,7 +450,7 @@ class DB
                     `language_code`            = VALUES(`language_code`),
                     `is_premium`               = VALUES(`is_premium`),
                     `added_to_attachment_menu` = VALUES(`added_to_attachment_menu`),
-                    `enterprise_id`            = VALUES(`enterprise_id`),
+                    `admin_user_id`            = VALUES(`admin_user_id`),
                     `updated_at`               = VALUES(`updated_at`)
             ');
 
@@ -465,7 +465,7 @@ class DB
             $date = $date ?: self::getTimestamp();
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':updated_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             $status = $sth->execute();
         } catch (PDOException $e) {
@@ -477,14 +477,14 @@ class DB
             try {
                 $sth = self::$pdo->prepare('
                     INSERT IGNORE INTO `' . TB_USER_CHAT . '`
-                    (`user_id`, `chat_id`, `enterprise_id`)
+                    (`user_id`, `chat_id`, `admin_user_id`)
                     VALUES
-                    (:user_id, :chat_id, :enterprise_id)
+                    (:user_id, :chat_id, :admin_user_id)
                 ');
 
                 $sth->bindValue(':user_id', $user->getId());
                 $sth->bindValue(':chat_id', $chat->getId());
-                $sth->bindValue(':enterprise_id', self::$enterprise_id);
+                $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
                 $status = $sth->execute();
             } catch (PDOException $e) {
@@ -514,9 +514,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT IGNORE INTO `' . TB_CHAT . '`
-                (`id`, `type`, `title`, `username`, `first_name`, `last_name`, `is_forum`, `created_at` ,`updated_at`, `old_id`, `enterprise_id`)
+                (`id`, `type`, `title`, `username`, `first_name`, `last_name`, `is_forum`, `created_at` ,`updated_at`, `old_id`, `admin_user_id`)
                 VALUES
-                (:id, :type, :title, :username, :first_name, :last_name, :is_forum, :created_at, :updated_at, :old_id, :enterprise_id)
+                (:id, :type, :title, :username, :first_name, :last_name, :is_forum, :created_at, :updated_at, :old_id, :admin_user_id)
                 ON DUPLICATE KEY UPDATE
                     `type`                           = VALUES(`type`),
                     `title`                          = VALUES(`title`),
@@ -524,7 +524,7 @@ class DB
                     `first_name`                     = VALUES(`first_name`),
                     `last_name`                      = VALUES(`last_name`),
                     `is_forum`                       = VALUES(`is_forum`),
-                    `enterprise_id`                  = VALUES(`enterprise_id`),
+                    `admin_user_id`                  = VALUES(`admin_user_id`),
                     `updated_at`                     = VALUES(`updated_at`)
             ');
 
@@ -549,7 +549,7 @@ class DB
             $sth->bindValue(':is_forum', $chat->getIsForum());
             $date = $date ?: self::getTimestamp();
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
             $sth->bindValue(':updated_at', $date);
 
             return $sth->execute();
@@ -562,12 +562,12 @@ class DB
      * Insert request into database
      *
      * @param Update $update
-     * @param int $enterprise_id
+     * @param int $admin_user_id
      * @return bool
      * @throws TelegramException
      *
      */
-    public static function insertRequest(Update $update, int $enterprise_id = 0): bool
+    public static function insertRequest(Update $update, int $admin_user_id = 0): bool
     {
         if (!self::isDbConnected()) {
             return false;
@@ -662,9 +662,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT IGNORE INTO `' . TB_INLINE_QUERY . '`
-                (`id`, `user_id`, `location`, `query`, `offset`, `chat_type`, `created_at`, `enterprise_id`)
+                (`id`, `user_id`, `location`, `query`, `offset`, `chat_type`, `created_at`, `admin_user_id`)
                 VALUES
-                (:id, :user_id, :location, :query, :offset, :chat_type, :created_at,:enterprise_id)
+                (:id, :user_id, :location, :query, :offset, :chat_type, :created_at,:admin_user_id)
             ');
 
             $date    = self::getTimestamp();
@@ -682,7 +682,7 @@ class DB
             $sth->bindValue(':offset', $inline_query->getOffset());
             $sth->bindValue(':chat_type', $inline_query->getChatType());
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -707,9 +707,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT INTO `' . TB_CHOSEN_INLINE_RESULT . '`
-                (`result_id`, `user_id`, `location`, `inline_message_id`, `query`, `created_at`, `enterprise_id`)
+                (`result_id`, `user_id`, `location`, `inline_message_id`, `query`, `created_at`, `admin_user_id`)
                 VALUES
-                (:result_id, :user_id, :location, :inline_message_id, :query, :created_at, :enterprise_id)
+                (:result_id, :user_id, :location, :inline_message_id, :query, :created_at, :admin_user_id)
             ');
 
             $date    = self::getTimestamp();
@@ -726,7 +726,7 @@ class DB
             $sth->bindValue(':inline_message_id', $chosen_inline_result->getInlineMessageId());
             $sth->bindValue(':query', $chosen_inline_result->getQuery());
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -751,9 +751,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT IGNORE INTO `' . TB_CALLBACK_QUERY . '`
-                (`id`, `user_id`, `chat_id`, `message_id`, `inline_message_id`, `chat_instance`, `data`, `game_short_name`, `created_at`, `enterprise_id`)
+                (`id`, `user_id`, `chat_id`, `message_id`, `inline_message_id`, `chat_instance`, `data`, `game_short_name`, `created_at`, `admin_user_id`)
                 VALUES
-                (:id, :user_id, :chat_id, :message_id, :inline_message_id, :chat_instance, :data, :game_short_name, :created_at, :enterprise_id)
+                (:id, :user_id, :chat_id, :message_id, :inline_message_id, :chat_instance, :data, :game_short_name, :created_at, :admin_user_id)
             ');
 
             $date    = self::getTimestamp();
@@ -794,7 +794,7 @@ class DB
             $sth->bindValue(':data', $callback_query->getData());
             $sth->bindValue(':game_short_name', $callback_query->getGameShortName());
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -819,9 +819,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT IGNORE INTO `' . TB_SHIPPING_QUERY . '`
-                (`id`, `user_id`, `invoice_payload`, `shipping_address`, `created_at`, `enterprise_id`)
+                (`id`, `user_id`, `invoice_payload`, `shipping_address`, `created_at`, `admin_user_id`)
                 VALUES
-                (:id, :user_id, :invoice_payload, :shipping_address, :created_at, :enterprise_id)
+                (:id, :user_id, :invoice_payload, :shipping_address, :created_at, :admin_user_id)
             ');
 
             $date    = self::getTimestamp();
@@ -837,7 +837,7 @@ class DB
             $sth->bindValue(':invoice_payload', $shipping_query->getInvoicePayload());
             $sth->bindValue(':shipping_address', $shipping_query->getShippingAddress());
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -862,9 +862,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT IGNORE INTO `' . TB_PRE_CHECKOUT_QUERY . '`
-                (`id`, `user_id`, `currency`, `total_amount`, `invoice_payload`, `shipping_option_id`, `order_info`, `created_at`, `enterprise_id`)
+                (`id`, `user_id`, `currency`, `total_amount`, `invoice_payload`, `shipping_option_id`, `order_info`, `created_at`, `admin_user_id`)
                 VALUES
-                (:id, :user_id, :currency, :total_amount, :invoice_payload, :shipping_option_id, :order_info, :created_at, :enterprise_id)
+                (:id, :user_id, :currency, :total_amount, :invoice_payload, :shipping_option_id, :order_info, :created_at, :admin_user_id)
             ');
 
             $date    = self::getTimestamp();
@@ -883,7 +883,7 @@ class DB
             $sth->bindValue(':shipping_option_id', $pre_checkout_query->getShippingOptionId());
             $sth->bindValue(':order_info', $pre_checkout_query->getOrderInfo());
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -908,9 +908,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT INTO `' . TB_POLL . '`
-                (`id`, `question`, `options`, `total_voter_count`, `is_closed`, `is_anonymous`, `type`, `allows_multiple_answers`, `correct_option_id`, `explanation`, `explanation_entities`, `open_period`, `close_date`, `created_at`, `enterprise_id`)
+                (`id`, `question`, `options`, `total_voter_count`, `is_closed`, `is_anonymous`, `type`, `allows_multiple_answers`, `correct_option_id`, `explanation`, `explanation_entities`, `open_period`, `close_date`, `created_at`, `admin_user_id`)
                 VALUES
-                (:id, :question, :options, :total_voter_count, :is_closed, :is_anonymous, :type, :allows_multiple_answers, :correct_option_id, :explanation, :explanation_entities, :open_period, :close_date, :created_at, :enterprise_id)
+                (:id, :question, :options, :total_voter_count, :is_closed, :is_anonymous, :type, :allows_multiple_answers, :correct_option_id, :explanation, :explanation_entities, :open_period, :close_date, :created_at, :admin_user_id)
                 ON DUPLICATE KEY UPDATE
                     `options`                 = VALUES(`options`),
                     `total_voter_count`       = VALUES(`total_voter_count`),
@@ -939,7 +939,7 @@ class DB
             $sth->bindValue(':open_period', $poll->getOpenPeriod());
             $sth->bindValue(':close_date', self::getTimestamp($poll->getCloseDate()));
             $sth->bindValue(':created_at', self::getTimestamp());
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -964,9 +964,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT INTO `' . TB_POLL_ANSWER . '`
-                (`poll_id`, `user_id`, `option_ids`, `created_at`, `enterprise_id`)
+                (`poll_id`, `user_id`, `option_ids`, `created_at`, `admin_user_id`)
                 VALUES
-                (:poll_id, :user_id, :option_ids, :created_at, :enterprise_id)
+                (:poll_id, :user_id, :option_ids, :created_at, :admin_user_id)
                 ON DUPLICATE KEY UPDATE
                     `option_ids` = VALUES(`option_ids`)
             ');
@@ -983,7 +983,7 @@ class DB
             $sth->bindValue(':user_id', $user_id);
             $sth->bindValue(':option_ids', json_encode($poll_answer->getOptionIds()));
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
             return $sth->execute();
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
@@ -1007,9 +1007,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT INTO `' . TB_CHAT_MEMBER_UPDATED . '`
-                (`chat_id`, `user_id`, `date`, `old_chat_member`, `new_chat_member`, `invite_link`, `created_at`, `enterprise_id`)
+                (`chat_id`, `user_id`, `date`, `old_chat_member`, `new_chat_member`, `invite_link`, `created_at`, `admin_user_id`)
                 VALUES
-                (:chat_id, :user_id, :date, :old_chat_member, :new_chat_member, :invite_link, :created_at, :enterprise_id)
+                (:chat_id, :user_id, :date, :old_chat_member, :new_chat_member, :invite_link, :created_at, :admin_user_id)
             ');
 
             $date    = self::getTimestamp();
@@ -1032,7 +1032,7 @@ class DB
             $sth->bindValue(':new_chat_member', $chat_member_updated->getNewChatMember());
             $sth->bindValue(':invite_link', $chat_member_updated->getInviteLink());
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -1057,9 +1057,9 @@ class DB
         try {
             $sth = self::$pdo->prepare('
                 INSERT INTO `' . TB_CHAT_JOIN_REQUEST . '`
-                (`chat_id`, `user_id`, `date`, `bio`, `invite_link`, `created_at`, `enterprise_id`)
+                (`chat_id`, `user_id`, `date`, `bio`, `invite_link`, `created_at`, `admin_user_id`)
                 VALUES
-                (:chat_id, :user_id, :date, :bio, :invite_link, :created_at, :enterprise_id)
+                (:chat_id, :user_id, :date, :bio, :invite_link, :created_at, :admin_user_id)
             ');
 
             $date    = self::getTimestamp();
@@ -1081,7 +1081,7 @@ class DB
             $sth->bindValue(':bio', $chat_join_request->getBio());
             $sth->bindValue(':invite_link', $chat_join_request->getInviteLink());
             $sth->bindValue(':created_at', $date);
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -1172,7 +1172,7 @@ class DB
                     `supergroup_chat_created`, `channel_chat_created`, `message_auto_delete_timer_changed`, `migrate_to_chat_id`, `migrate_from_chat_id`,
                     `pinned_message`, `invoice`, `successful_payment`, `user_shared`, `chat_shared`, `connected_website`, `write_access_allowed`, `passport_data`, `proximity_alert_triggered`,
                     `forum_topic_created`, `forum_topic_edited`, `forum_topic_closed`, `forum_topic_reopened`, `general_forum_topic_hidden`, `general_forum_topic_unhidden`,
-                    `video_chat_scheduled`, `video_chat_started`, `video_chat_ended`, `video_chat_participants_invited`, `web_app_data`, `reply_markup`, `enterprise_id`
+                    `video_chat_scheduled`, `video_chat_started`, `video_chat_ended`, `video_chat_participants_invited`, `web_app_data`, `reply_markup`, `admin_user_id`
                 ) VALUES (
                     :message_id, :user_id, :chat_id, :message_thread_id, :sender_chat_id, :date, :forward_from, :forward_from_chat, :forward_from_message_id,
                     :forward_signature, :forward_sender_name, :forward_date, :is_topic_message,
@@ -1183,7 +1183,7 @@ class DB
                     :supergroup_chat_created, :channel_chat_created, :message_auto_delete_timer_changed, :migrate_to_chat_id, :migrate_from_chat_id,
                     :pinned_message, :invoice, :successful_payment, :user_shared, :chat_shared, :connected_website, :write_access_allowed, :passport_data, :proximity_alert_triggered,
                     :forum_topic_created, :forum_topic_edited, :forum_topic_closed, :forum_topic_reopened, :general_forum_topic_hidden, :general_forum_topic_unhidden,
-                    :video_chat_scheduled, :video_chat_started, :video_chat_ended, :video_chat_participants_invited, :web_app_data, :reply_markup, :enterprise_id
+                    :video_chat_scheduled, :video_chat_started, :video_chat_ended, :video_chat_participants_invited, :web_app_data, :reply_markup, :admin_user_id
                 )
             ');
 
@@ -1275,7 +1275,7 @@ class DB
             $sth->bindValue(':video_chat_participants_invited', $message->getVideoChatParticipantsInvited());
             $sth->bindValue(':web_app_data', $message->getWebAppData());
             $sth->bindValue(':reply_markup', $message->getReplyMarkup());
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -1311,9 +1311,9 @@ class DB
 
             $sth = self::$pdo->prepare('
                 INSERT IGNORE INTO `' . TB_EDITED_MESSAGE . '`
-                (`chat_id`, `message_id`, `user_id`, `edit_date`, `text`, `entities`, `caption`,`enterprise_id`)
+                (`chat_id`, `message_id`, `user_id`, `edit_date`, `text`, `entities`, `caption`,`admin_user_id`)
                 VALUES
-                (:chat_id, :message_id, :user_id, :edit_date, :text, :entities, :caption, :enterprise_id)
+                (:chat_id, :message_id, :user_id, :edit_date, :text, :entities, :caption, :admin_user_id)
             ');
 
             $user_id = $user ? $user->getId() : null;
@@ -1325,7 +1325,7 @@ class DB
             $sth->bindValue(':text', $edited_message->getText());
             $sth->bindValue(':entities', self::entitiesArrayToJson($edited_message->getEntities() ?: []));
             $sth->bindValue(':caption', $edited_message->getCaption());
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
@@ -1437,8 +1437,8 @@ class DB
                 }
             }
 
-            if (self::$enterprise_id > 0) {
-                $where[] = TB_CHAT . '.`enterprise_id` = :enterprise_id';
+            if (self::$admin_user_id > 0) {
+                $where[] = TB_CHAT . '.`admin_user_id` = :admin_user_id';
             }
 
             if (!empty($where)) {
@@ -1513,9 +1513,9 @@ class DB
 
         try {
             $sth = self::$pdo->prepare('INSERT INTO `' . TB_REQUEST_LIMITER . '`
-                (`method`, `chat_id`, `inline_message_id`, `created_at`, `enterprise_id`)
+                (`method`, `chat_id`, `inline_message_id`, `created_at`, `admin_user_id`)
                 VALUES
-                (:method, :chat_id, :inline_message_id, :created_at, :enterprise_id);
+                (:method, :chat_id, :inline_message_id, :created_at, :admin_user_id);
             ');
 
             $chat_id           = $data['chat_id'] ?? null;
@@ -1525,7 +1525,7 @@ class DB
             $sth->bindValue(':inline_message_id', $inline_message_id);
             $sth->bindValue(':method', $method);
             $sth->bindValue(':created_at', self::getTimestamp());
-            $sth->bindValue(':enterprise_id', self::$enterprise_id);
+            $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
             return $sth->execute();
         } catch (PDOException $e) {
