@@ -454,14 +454,16 @@ class DB
                     `updated_at`               = VALUES(`updated_at`)
             ');
 
+            $is_premium = $user->getIsPremium() ? 1 : 0 ;
+
             $sth->bindValue(':id', $user->getId());
             $sth->bindValue(':is_bot', $user->getIsBot(), PDO::PARAM_INT);
             $sth->bindValue(':username', $user->getUsername());
             $sth->bindValue(':first_name', $user->getFirstName());
             $sth->bindValue(':last_name', $user->getLastName());
             $sth->bindValue(':language_code', $user->getLanguageCode());
-            $sth->bindValue(':is_premium', $user->getIsPremium(), PDO::PARAM_INT);
-            $sth->bindValue(':added_to_attachment_menu', $user->getAddedToAttachmentMenu(), PDO::PARAM_INT);
+            $sth->bindValue(':is_premium', $is_premium);
+            $sth->bindValue(':added_to_attachment_menu', $user->getAddedToAttachmentMenu() ? 1 : 0);
             $date = $date ?: self::getTimestamp();
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':updated_at', $date);
