@@ -413,8 +413,9 @@ class DB
             $sth->bindValue(':chat_member_updated_id', $chat_member_updated_id);
             $sth->bindValue(':chat_join_request_id', $chat_join_request_id);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
-
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -554,7 +555,9 @@ class DB
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
             $sth->bindValue(':updated_at', $date);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -686,7 +689,9 @@ class DB
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -730,7 +735,9 @@ class DB
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -798,7 +805,9 @@ class DB
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -841,7 +850,9 @@ class DB
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -887,7 +898,9 @@ class DB
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -903,6 +916,7 @@ class DB
      */
     public static function insertPollRequest(Poll $poll): bool
     {
+        echo __METHOD__ . " is execute \n";
         if (!self::isDbConnected()) {
             return false;
         }
@@ -942,8 +956,9 @@ class DB
             $sth->bindValue(':close_date', self::getTimestamp($poll->getCloseDate()));
             $sth->bindValue(':created_at', self::getTimestamp());
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
-
-            return $sth->execute();
+            $result = $sth->execute();
+            $sth->debugDumpParams();
+            return $result;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -959,6 +974,7 @@ class DB
      */
     public static function insertPollAnswerRequest(PollAnswer $poll_answer): bool
     {
+        echo __METHOD__ . " is execute \n";
         if (!self::isDbConnected()) {
             return false;
         }
@@ -986,7 +1002,9 @@ class DB
             $sth->bindValue(':option_ids', json_encode($poll_answer->getOptionIds()));
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -1036,7 +1054,9 @@ class DB
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -1085,7 +1105,9 @@ class DB
             $sth->bindValue(':created_at', $date);
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -1279,7 +1301,9 @@ class DB
             $sth->bindValue(':reply_markup', $message->getReplyMarkup());
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -1329,7 +1353,9 @@ class DB
             $sth->bindValue(':caption', $edited_message->getCaption());
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -1529,7 +1555,9 @@ class DB
             $sth->bindValue(':created_at', self::getTimestamp());
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
 
-            return $sth->execute();
+            $return =  $sth->execute();
+            $sth->debugDumpParams();
+            return  $return;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
