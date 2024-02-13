@@ -903,6 +903,7 @@ class DB
      */
     public static function insertPollRequest(Poll $poll): bool
     {
+        echo __METHOD__ . " is execute";
         if (!self::isDbConnected()) {
             return false;
         }
@@ -942,8 +943,9 @@ class DB
             $sth->bindValue(':close_date', self::getTimestamp($poll->getCloseDate()));
             $sth->bindValue(':created_at', self::getTimestamp());
             $sth->bindValue(':admin_user_id', self::$admin_user_id);
-
-            return $sth->execute();
+            $result = $sth->execute();
+            $sth->debugDumpParams();
+            return $result;
         } catch (PDOException $e) {
             throw new TelegramException($e->getMessage());
         }
@@ -959,6 +961,7 @@ class DB
      */
     public static function insertPollAnswerRequest(PollAnswer $poll_answer): bool
     {
+        echo __METHOD__ . " is execute";
         if (!self::isDbConnected()) {
             return false;
         }
